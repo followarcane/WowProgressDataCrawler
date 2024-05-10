@@ -1,0 +1,15 @@
+  properties:
+    wowprogress:
+      url: "https://www.wowprogress.com/gearscore/?lfg=1&sortby=ts"
+
+
+  spring:
+    datasource:
+      url: jdbc:postgresql://localhost:5432/wowdatacrawler
+      username: postgres
+      password: pass
+    jpa:
+      hibernate:
+        ddl-auto: create
+    flyway:
+      clean-disabled: false

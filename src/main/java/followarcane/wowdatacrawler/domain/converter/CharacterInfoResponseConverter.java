@@ -1,25 +1,25 @@
 package followarcane.wowdatacrawler.domain.converter;
 
+import followarcane.wowdatacrawler.domain.model.CharacterInfoResponse;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
-import followarcane.wowdatacrawler.domain.model.CharacterInfoDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class CharacterInfoResponseConverter {
-    public static CharacterInfoDTO convert(CharacterInfo characterInfo) {
-        return CharacterInfoDTO.builder()
-                .name(characterInfo.getName())
-                .guild(characterInfo.getGuild().isEmpty() ? "No Guild" : characterInfo.getGuild())
-                .raid(characterInfo.getRaid())
-                .realm(characterInfo.getRealm())
-                .ranking(characterInfo.getRanking())
+    public static CharacterInfo convert(CharacterInfoResponse characterInfoResponse) {
+        return CharacterInfo.builder()
+                .name(characterInfoResponse.getName())
+                .guild(characterInfoResponse.getGuild().isEmpty() ? "No Guild" : characterInfoResponse.getGuild())
+                .raid(characterInfoResponse.getRaid())
+                .realm(characterInfoResponse.getRealm())
+                .ranking(characterInfoResponse.getRanking())
                 .build();
     }
 
-    public List<CharacterInfoDTO> convert(List<CharacterInfo> listCharacterInfo) {
-        return listCharacterInfo.stream()
+    public List<CharacterInfo> convert(List<CharacterInfoResponse> listCharacterInfoResponse) {
+        return listCharacterInfoResponse.stream()
                 .map(CharacterInfoResponseConverter::convert)
                 .toList();
     }

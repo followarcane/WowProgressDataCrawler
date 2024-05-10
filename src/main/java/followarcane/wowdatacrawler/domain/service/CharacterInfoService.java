@@ -1,6 +1,6 @@
 package followarcane.wowdatacrawler.domain.service;
 
-import followarcane.wowdatacrawler.domain.model.CharacterInfoDTO;
+import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.repository.CharacterInfoRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +15,11 @@ public class CharacterInfoService {
         this.characterInfoRepository = repository;
     }
 
-    public List<CharacterInfoDTO> getAllCharacterInfos() {
+    public List<CharacterInfo> getAllCharacterInfos() {
         return characterInfoRepository.findAll();
     }
 
-    public CharacterInfoDTO createCharacterInfo(CharacterInfoDTO characterInfo) {
+    public CharacterInfo createCharacterInfo(CharacterInfo characterInfo) {
         return characterInfoRepository.save(characterInfo);
     }
 

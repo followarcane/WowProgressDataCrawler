@@ -1,8 +1,8 @@
 package followarcane.wowdatacrawler.domain.service;
 
 import followarcane.wowdatacrawler.domain.converter.CharacterInfoResponseConverter;
+import followarcane.wowdatacrawler.domain.model.CharacterInfoResponse;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
-import followarcane.wowdatacrawler.domain.model.CharacterInfoDTO;
 import followarcane.wowdatacrawler.domain.repository.CharacterInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,23 +35,23 @@ public class WowDataCrawlerService {
 
     @Scheduled(fixedRate = 30000)
     public void scheduleFixedRateTask() {
-        List<CharacterInfo> list = crawlCharacterInfoFromWeb(wowProgressUrl);
+        List<CharacterInfoResponse> list = crawlCharacterInfoFromWeb(wowProgressUrl);
         saveToDatabase(characterInfoResponseConverter.convert(list));
     }
 
-    private void saveToDatabase(List<CharacterInfoDTO> list) {
+    private void saveToDatabase(List<CharacterInfo> list) {
         characterInfoRepository.saveAll(list);
     }
 
-    public List<CharacterInfo> crawlCharacterInfoFromWeb(String url) {
+    public List<CharacterInfoResponse> crawlCharacterInfoFromWeb(String url) {
         try {
             Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
             Elements rows = doc.select("table.rating > tbody > tr");
 
-            List<CharacterInfo> list = new ArrayList<>();
+            List<CharacterInfoResponse> list = new ArrayList<>();
             for (Element row : rows) {
-                CharacterInfo characterInfoFromRow = createCharacterInfoFromRow(row);
-                list.add(characterInfoFromRow);
+                CharacterInfoResponse characterInfoResponseFromRow = createCharacterInfoFromRow(row);
+                list.add(characterInfoResponseFromRow);
             }
             return list;
         } catch (IOException e) {
@@ -60,7 +60,7 @@ public class WowDataCrawlerService {
         }
     }
 
-    private CharacterInfo createCharacterInfoFromRow(Element row) {
+    private CharacterInfoResponse createCharacterInfoFromRow(Element row) {
         String characterName = row.select("td:nth-child(1) > a").text();
         String guildName = row.select("td:nth-child(2) > a").text();
         String realm = row.select("td:nth-child(4) > nobr > a").text();
@@ -68,7 +68,7 @@ public class WowDataCrawlerService {
 
         log.info("Character: {}, Guild: {}, Realm: {}, Score: {}", characterName, guildName, realm, characterScore);
 
-        return CharacterInfo.builder()
+        return CharacterInfoResponse.builder()
                 .name(characterName)
                 .guild(guildName)
                 .realm(realm)

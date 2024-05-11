@@ -44,7 +44,9 @@ Once your server is up and running, a `latest-lfg` request can be made from your
 
 Here's an example of the command you'll run on your terminal to simulate the request:
 
-```curl -X GET http://localhost:8080/api/v1/wdc/latest-lfg```
+```
+curl -X GET http://localhost:8080/api/v1/wdc/latest-lfg
+```
 
 This command fires a `GET` request to your server running locally at port 8080, and specifically to the endpoint `/api/v1/wdc/latest-lfg`. This `latest-lfg` request returns a list of the latest Looking For Group (LFG) postings.
 

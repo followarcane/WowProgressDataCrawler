@@ -17,6 +17,7 @@ public class CharacterInfo {
     private String name;
     private String guild;
     private String raid;
+    private String region;
     private String realm;
     private String ranking;
 

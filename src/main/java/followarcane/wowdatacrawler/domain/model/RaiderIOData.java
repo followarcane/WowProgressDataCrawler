@@ -1,5 +1,6 @@
 package followarcane.wowdatacrawler.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -19,6 +20,8 @@ public class RaiderIOData {
 
     private String name;
     private String race;
+    @JsonProperty("class")
+    private String characterClass;
     private String roleClass;
     private String activeSpecName;
     private String activeSpecRole;

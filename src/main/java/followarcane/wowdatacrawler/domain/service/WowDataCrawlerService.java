@@ -4,6 +4,7 @@ import com.nimbusds.jose.shaded.json.JSONObject;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.RaiderIOData;
 import followarcane.wowdatacrawler.domain.repository.CharacterInfoRepository;
+import followarcane.wowdatacrawler.domain.utils.Regions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -40,6 +41,7 @@ public class WowDataCrawlerService {
     @Scheduled(fixedRate = 30000)
     public void scheduleFixedRateTask() {
         List<CharacterInfo> list = crawlCharacterInfoFromWeb(wowProgressUrl);
+        List<RaiderIOData> raiderIODataList = new ArrayList<>();
 
         if (!isFirstElementEqual(list, lastFetchedData)) {
             characterInfoRepository.deleteAll();
@@ -50,11 +52,14 @@ public class WowDataCrawlerService {
             for (CharacterInfo info : lastFetchedData) {
                 try {
                     RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
-                    raiderIOService.parseAndSaveData(new JSONObject(data.getRaidProgressions()));
+                    info.setRaiderIOData(data);
+                    characterInfoRepository.save(info);
+                    raiderIODataList.add(data);
                 } catch (Exception e) {
                     log.error("Failed to fetch and save RaiderIOData for character: " + info.getName(), e);
                 }
             }
+            raiderIOService.deleteAndSaveData(raiderIODataList);
         } else {
             log.info("No new data found!");
         }
@@ -82,17 +87,21 @@ public class WowDataCrawlerService {
 
     private CharacterInfo createCharacterInfoFromRow(Element row) {
         String characterName = row.select("td:nth-child(1) > a").text();
-        String guildName = row.select("td:nth-child(2) > a").text();
-        String realm = row.select("td:nth-child(4) > nobr > a").text();
+        String regionFullName = row.select("td:nth-child(4) > nobr > a").text();
         String characterScore = row.select("td:nth-child(5)").text();
 
-        if (characterName.isEmpty()) {
+        if (characterName.isEmpty() || regionFullName.isEmpty()) {
             return null;
         }
 
+        String[] splitRegion = regionFullName.split("-");
+        String regionName = splitRegion[0].trim().split(" ")[0];
+        Regions region = Regions.valueOf(regionName.toUpperCase());
+        String realm = splitRegion[1].trim();
+
         return CharacterInfo.builder()
                 .name(characterName)
-                .guild(guildName)
+                .region(region.name())
                 .realm(realm)
                 .ranking(characterScore)
                 .build();

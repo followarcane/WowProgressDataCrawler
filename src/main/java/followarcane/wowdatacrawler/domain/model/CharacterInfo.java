@@ -1,11 +1,7 @@
 package followarcane.wowdatacrawler.domain.model;
 
 import lombok.*;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,4 +19,9 @@ public class CharacterInfo {
     private String raid;
     private String realm;
     private String ranking;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "raider_io_data_id", referencedColumnName = "id")
+    private RaiderIOData raiderIOData;
+
 }

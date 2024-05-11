@@ -1,6 +1,8 @@
 package followarcane.wowdatacrawler.domain.service;
 
+import com.nimbusds.jose.shaded.json.JSONObject;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
+import followarcane.wowdatacrawler.domain.model.RaiderIOData;
 import followarcane.wowdatacrawler.domain.repository.CharacterInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public class WowDataCrawlerService {
 
     private final CharacterInfoRepository characterInfoRepository;
+    private final RaiderIOService raiderIOService;
 
     private List<CharacterInfo> lastFetchedData = new ArrayList<>();
 
@@ -43,6 +46,15 @@ public class WowDataCrawlerService {
             saveToDatabase(list);
             lastFetchedData = list;
             log.info("Last fetched data: {}", lastFetchedData);
+
+            for (CharacterInfo info : lastFetchedData) {
+                try {
+                    RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
+                    raiderIOService.parseAndSaveData(new JSONObject(data.getRaidProgressions()));
+                } catch (Exception e) {
+                    log.error("Failed to fetch and save RaiderIOData for character: " + info.getName(), e);
+                }
+            }
         } else {
             log.info("No new data found!");
         }

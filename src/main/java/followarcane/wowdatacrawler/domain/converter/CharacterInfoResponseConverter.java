@@ -8,18 +8,18 @@ import java.util.List;
 
 @Component
 public class CharacterInfoResponseConverter {
-    public static CharacterInfo convert(CharacterInfoResponse characterInfoResponse) {
-        return CharacterInfo.builder()
-                .name(characterInfoResponse.getName())
-                .guild(characterInfoResponse.getGuild().isEmpty() ? "No Guild" : characterInfoResponse.getGuild())
-                .raid(characterInfoResponse.getRaid())
-                .realm(characterInfoResponse.getRealm())
-                .ranking(characterInfoResponse.getRanking())
+    public static CharacterInfoResponse convert(CharacterInfo characterInfo) {
+        return CharacterInfoResponse.builder()
+                .name(characterInfo.getName())
+                .guild(characterInfo.getGuild().isEmpty() ? "No Guild" : characterInfo.getGuild())
+                .raid(characterInfo.getRaid())
+                .realm(characterInfo.getRealm())
+                .ranking(characterInfo.getRanking())
                 .build();
     }
 
-    public List<CharacterInfo> convert(List<CharacterInfoResponse> listCharacterInfoResponse) {
-        return listCharacterInfoResponse.stream()
+    public List<CharacterInfoResponse> convert(List<CharacterInfo> listCharacterInfo) {
+        return listCharacterInfo.stream()
                 .map(CharacterInfoResponseConverter::convert)
                 .toList();
     }

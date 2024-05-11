@@ -33,25 +33,25 @@ public class WowDataCrawlerService {
     @Value("${properties.wowprogress.url}")
     private String wowProgressUrl;
 
-    @Scheduled(fixedRate = 30000)
+    //@Scheduled(fixedRate = 30000)
     public void scheduleFixedRateTask() {
-        List<CharacterInfoResponse> list = crawlCharacterInfoFromWeb(wowProgressUrl);
-        saveToDatabase(characterInfoResponseConverter.convert(list));
+        List<CharacterInfo> list = crawlCharacterInfoFromWeb(wowProgressUrl);
+        saveToDatabase(list);
     }
 
     private void saveToDatabase(List<CharacterInfo> list) {
         characterInfoRepository.saveAll(list);
     }
 
-    public List<CharacterInfoResponse> crawlCharacterInfoFromWeb(String url) {
+    public List<CharacterInfo> crawlCharacterInfoFromWeb(String url) {
         try {
             Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
             Elements rows = doc.select("table.rating > tbody > tr");
 
-            List<CharacterInfoResponse> list = new ArrayList<>();
+            List<CharacterInfo> list = new ArrayList<>();
             for (Element row : rows) {
-                CharacterInfoResponse characterInfoResponseFromRow = createCharacterInfoFromRow(row);
-                list.add(characterInfoResponseFromRow);
+                CharacterInfo characterInfoFromRow = createCharacterInfoFromRow(row);
+                list.add(characterInfoFromRow);
             }
             return list;
         } catch (IOException e) {
@@ -60,7 +60,7 @@ public class WowDataCrawlerService {
         }
     }
 
-    private CharacterInfoResponse createCharacterInfoFromRow(Element row) {
+    private CharacterInfo createCharacterInfoFromRow(Element row) {
         String characterName = row.select("td:nth-child(1) > a").text();
         String guildName = row.select("td:nth-child(2) > a").text();
         String realm = row.select("td:nth-child(4) > nobr > a").text();
@@ -68,7 +68,7 @@ public class WowDataCrawlerService {
 
         log.info("Character: {}, Guild: {}, Realm: {}, Score: {}", characterName, guildName, realm, characterScore);
 
-        return CharacterInfoResponse.builder()
+        return CharacterInfo.builder()
                 .name(characterName)
                 .guild(guildName)
                 .realm(realm)

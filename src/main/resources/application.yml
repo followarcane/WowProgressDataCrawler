@@ -10,6 +10,12 @@
       password: pass
     jpa:
       hibernate:
-        ddl-auto: create
+        ddl-auto: validate
     flyway:
-      clean-disabled: false
+      enabled: true
+      clean-disabled: true
+    security:
+      oauth2:
+        resourceserver:
+          jwt:
+            jwk-set-uri: https://example.com/.well-known/jwks.json

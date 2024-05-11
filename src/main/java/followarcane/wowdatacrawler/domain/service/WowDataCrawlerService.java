@@ -42,6 +42,7 @@ public class WowDataCrawlerService {
             characterInfoRepository.deleteAll();
             saveToDatabase(list);
             lastFetchedData = list;
+            log.info("Last fetched data: {}", lastFetchedData);
         } else {
             log.info("No new data found!");
         }
@@ -76,8 +77,6 @@ public class WowDataCrawlerService {
         if (characterName.isEmpty()) {
             return null;
         }
-
-        log.info("Character: {}, Guild: {}, Realm: {}, Score: {}", characterName, guildName, realm, characterScore);
 
         return CharacterInfo.builder()
                 .name(characterName)

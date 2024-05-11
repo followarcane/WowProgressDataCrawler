@@ -1,30 +1,33 @@
 # WowProgressDataCrawler
 
-## Description
+## Introduction
 
-`WowProgressDataCrawler` is a simple web scraper using [Jsoup](https://jsoup.org/) to fetch and parse character data from the World of Warcraft rankings on wowprogress.com.
+WowProgressDataCrawler is a web application built using Java 17, Jakarta EE, Spring Data JPA, Spring MVC, Lombok, and Jsoup. The application is designed to scrape character data from wowprogress.com, parse it, and update a list that can be reused.
 
-## Features
+## Key Features
 
-* Fetch character data from WowProgress.com
-* Parse the webpage to extract character details like name, guild, realm, character score
-* Log the parsed information
-* Return a list of `CharacterInfo` objects containing the parsed information
+- Extract character data from WowProgress.com
+- Parsing the extracted webpage to obtain character details such as name, guild, realm, and character score.
+- Logging the obtained information
+- Transforming the parsed data into a list of `CharacterInfo` objects
+- Keeping the data on an up-to-date list and tracking changes
+- Logging of HTTP requests and responses
 
 ## Technologies Used
 
-* [Java 17](https://openjdk.java.net/projects/jdk/17/)
-* [Spring Boot](https://spring.io/projects/spring-boot)
-* [Jsoup](https://jsoup.org/)
-* [Lombok](https://projectlombok.org/)
+- [Java 17](https://openjdk.java.net/projects/jdk/17/)
+- [Jakarta EE with jakarta imports](https://jakarta.ee/)
+- [Spring Data JPA](https://spring.io/projects/spring-data-jpa)
+- [Spring MVC](https://spring.io/projects/spring-mvc)
+- [Lombok](https://projectlombok.org/)
+- [Jsoup](https://jsoup.org/)
 
 ## How to Run
 
 1. Clone this repository
-2. Navigate to the project folder
+2. Navigate to the project directory
 3. Run `mvn spring-boot:run` to start the application
 
-## To Do
+## Future Plans
 
-1. Complete the `CharacterInfo` class to fully reflect the character data.
-2. Add a persistence layer (like a database) to save the scraped character data.
+We are continuously working to add more features, enhance the existing ones, and rectify any bugs. 

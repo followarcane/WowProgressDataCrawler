@@ -29,6 +29,7 @@ public class User {
 
     private String email;
 
+    @Builder.Default
     private Boolean enabled = true;
 
     @CreationTimestamp

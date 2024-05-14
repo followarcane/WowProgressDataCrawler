@@ -4,14 +4,12 @@ import followarcane.wowdatacrawler.domain.model.User;
 import followarcane.wowdatacrawler.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.stereotype.Component;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__({@Autowired}))
-@Transactional
 public class DatabaseSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;

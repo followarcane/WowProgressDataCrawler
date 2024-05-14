@@ -3,6 +3,8 @@ package followarcane.wowdatacrawler.domain.model;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class CharacterInfoResponse {
@@ -13,4 +15,5 @@ public class CharacterInfoResponse {
     private String realm;
     private String ranking;
     private RaiderIODataResponse raiderIODataResponse;
+    private List<RaidProgressionResponse> raidProgressions;
 }

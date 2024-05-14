@@ -2,6 +2,7 @@ package followarcane.wowdatacrawler.domain.model;
 
 import lombok.*;
 import javax.persistence.*;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,4 +26,6 @@ public class CharacterInfo {
     @JoinColumn(name = "raider_io_data_id", referencedColumnName = "id")
     private RaiderIOData raiderIOData;
 
+    @OneToMany(mappedBy = "characterInfo", cascade = CascadeType.ALL)
+    private List<RaidProgression> raidProgressions;
 }

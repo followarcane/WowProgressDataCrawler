@@ -1,6 +1,7 @@
   properties:
     wowprogress:
       url: "https://www.wowprogress.com/gearscore/?lfg=1&sortby=ts"
+      limit: 10
 
 
   spring:
@@ -10,7 +11,7 @@
       password: pass
     jpa:
       hibernate:
-        ddl-auto: update
+        ddl-auto: create
     flyway:
       enabled: true
       clean-disabled: true

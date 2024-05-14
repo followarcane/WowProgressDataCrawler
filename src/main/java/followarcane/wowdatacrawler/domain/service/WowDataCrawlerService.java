@@ -1,9 +1,7 @@
 package followarcane.wowdatacrawler.domain.service;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.RaiderIOData;
-import followarcane.wowdatacrawler.domain.repository.CharacterInfoRepository;
 import followarcane.wowdatacrawler.domain.utils.Regions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,10 +24,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor = @__({@Autowired}))
 @Slf4j
-@Transactional
 public class WowDataCrawlerService {
 
-    private final CharacterInfoRepository characterInfoRepository;
+    private final CharacterInfoService characterInfoService;
     private final RaiderIOService raiderIOService;
 
     private List<CharacterInfo> lastFetchedData = new ArrayList<>();
@@ -38,36 +34,36 @@ public class WowDataCrawlerService {
     @Value("${properties.wowprogress.url}")
     private String wowProgressUrl;
 
+    @Value("${properties.wowprogress.limit}")
+    private Long wowProgressLimit;
+
     @Scheduled(fixedRate = 30000)
     public void scheduleFixedRateTask() {
         List<CharacterInfo> list = crawlCharacterInfoFromWeb(wowProgressUrl);
         List<RaiderIOData> raiderIODataList = new ArrayList<>();
 
         if (!isFirstElementEqual(list, lastFetchedData)) {
-            characterInfoRepository.deleteAll();
-            saveToDatabase(list);
             lastFetchedData = list;
-            log.info("Last fetched data: {}", lastFetchedData);
+            characterInfoService.deleteAll();
+            raiderIOService.deleteAll();
 
-            for (CharacterInfo info : lastFetchedData) {
+            for (CharacterInfo info : list) {
                 try {
                     RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
                     info.setRaiderIOData(data);
-                    characterInfoRepository.save(info);
                     raiderIODataList.add(data);
                 } catch (Exception e) {
                     log.error("Failed to fetch and save RaiderIOData for character: " + info.getName(), e);
                 }
             }
-            raiderIOService.deleteAndSaveData(raiderIODataList);
+            log.info("New data found! Saving to database...");
+            characterInfoService.saveAll(list);
+            raiderIOService.saveAll(raiderIODataList);
         } else {
             log.info("No new data found!");
         }
     }
 
-    private void saveToDatabase(List<CharacterInfo> list) {
-        characterInfoRepository.saveAll(list);
-    }
 
     public List<CharacterInfo> crawlCharacterInfoFromWeb(String url) {
         try {
@@ -75,7 +71,7 @@ public class WowDataCrawlerService {
             Elements rows = doc.select("table.rating > tbody > tr");
 
             return rows.stream()
-                    .limit(10) // Limit for first 10 elements
+                    .limit(wowProgressLimit + 1)
                     .map(this::createCharacterInfoFromRow)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());

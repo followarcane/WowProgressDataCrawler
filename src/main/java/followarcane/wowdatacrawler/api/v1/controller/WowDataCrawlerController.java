@@ -4,7 +4,6 @@ import followarcane.wowdatacrawler.domain.converter.CharacterInfoResponseConvert
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.CharacterInfoResponse;
 import followarcane.wowdatacrawler.infrastructure.service.CharacterInfoService;
-import followarcane.wowdatacrawler.infrastructure.service.WowDataCrawlerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import java.util.List;
 @RequestMapping("/api/v1/wdc")
 public class WowDataCrawlerController {
 
-    private final WowDataCrawlerService wowDataCrawlerService;
     private final CharacterInfoService characterInfoService;
     private final CharacterInfoResponseConverter characterInfoResponseConverter;
 

@@ -33,10 +33,9 @@ public class CharacterInfoResponseConverter {
         return CharacterInfoResponse.builder()
                 .name(characterInfo.getName())
                 .guild(Objects.isNull(characterInfo.getGuild()) ? "No Guild" : characterInfo.getGuild())
-                .raid(characterInfo.getRaid())
                 .region(characterInfo.getRegion())
                 .realm(characterInfo.getRealm())
-                .ranking(characterInfo.getRanking())
+                .iLevel(characterInfo.getRanking())
                 .raiderIODataResponse(raiderIODataResponse)
                 .raidProgressions(raidProgressions)
                 .build();

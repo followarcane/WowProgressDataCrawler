@@ -1,7 +1,7 @@
 package followarcane.wowdatacrawler.infrastructure.persistence;
 
 import followarcane.wowdatacrawler.domain.model.User;
-import followarcane.wowdatacrawler.domain.repository.UserRepository;
+import followarcane.wowdatacrawler.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

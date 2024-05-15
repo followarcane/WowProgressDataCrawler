@@ -2,6 +2,11 @@
     wowprogress:
       url: "https://www.wowprogress.com/gearscore/?lfg=1&sortby=ts"
       limit: 10
+    google:
+      api:
+        key: URKEYHERE
+    raiderio:
+      url: "https://raider.io/api/v1/characters/profile"
 
 
   spring:

@@ -1,5 +1,6 @@
 package followarcane.wowdatacrawler.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import javax.persistence.*;
 import java.util.List;
@@ -17,10 +18,12 @@ public class CharacterInfo {
 
     private String name;
     private String guild;
-    private String raid;
     private String region;
     private String realm;
     private String ranking;
+
+    @JsonIgnore
+    private boolean isRussian = false;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "raider_io_data_id", referencedColumnName = "id")

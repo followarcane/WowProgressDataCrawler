@@ -8,11 +8,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-public class CharacterInfoResponseConverter {
+public class ResponseConverter {
 
     public List<CharacterInfoResponse> convert(List<CharacterInfo> listCharacterInfo) {
         return listCharacterInfo.stream()
-                .map(CharacterInfoResponseConverter::convert)
+                .map(ResponseConverter::convert)
                 .collect(Collectors.toList());
     }
 
@@ -26,7 +26,7 @@ public class CharacterInfoResponseConverter {
         List<RaidProgressionResponse> raidProgressions = null;
         if (characterInfo.getRaidProgressions() != null) {
             raidProgressions = characterInfo.getRaidProgressions().stream()
-                    .map(CharacterInfoResponseConverter::convert)
+                    .map(ResponseConverter::convert)
                     .collect(Collectors.toList());
         }
 

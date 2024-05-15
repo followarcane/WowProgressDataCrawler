@@ -1,0 +1,1 @@
+- Player logs will be crawled from warcraftlogs.com.

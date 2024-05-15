@@ -1,6 +1,6 @@
 package followarcane.wowdatacrawler.api.v1.controller;
 
-import followarcane.wowdatacrawler.domain.converter.CharacterInfoResponseConverter;
+import followarcane.wowdatacrawler.domain.converter.ResponseConverter;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.CharacterInfoResponse;
 import followarcane.wowdatacrawler.infrastructure.service.CharacterInfoService;
@@ -21,12 +21,12 @@ import java.util.List;
 public class WowDataCrawlerController {
 
     private final CharacterInfoService characterInfoService;
-    private final CharacterInfoResponseConverter characterInfoResponseConverter;
+    private final ResponseConverter responseConverter;
 
 
     @GetMapping("/latest-lfg")
     public ResponseEntity<List<CharacterInfoResponse>> getLfgs() {
         List<CharacterInfo> characterInfos = characterInfoService.getAllCharacterInfos();
-        return ResponseEntity.ok(characterInfoResponseConverter.convert(characterInfos));
+        return ResponseEntity.ok(responseConverter.convert(characterInfos));
     }
 }

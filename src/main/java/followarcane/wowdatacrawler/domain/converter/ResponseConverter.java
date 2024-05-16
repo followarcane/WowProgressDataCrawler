@@ -38,6 +38,8 @@ public class ResponseConverter {
                 .iLevel(characterInfo.getRanking())
                 .raiderIODataResponse(raiderIODataResponse)
                 .raidProgressions(raidProgressions)
+                .commentary(characterInfo.getCommentary())
+                .languages(characterInfo.getLanguages())
                 .build();
     }
 

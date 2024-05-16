@@ -11,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +52,11 @@ public class WowDataCrawlerService {
                 try {
                     RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
                     info.setRaiderIOData(data);
-                    info.setCommentary(fetchCharacterCommentary(info));
+
+                    Pair<String, String> commentaryAndLanguages = fetchCharacterCommentaryAndLanguages(info);
+                    info.setCommentary(commentaryAndLanguages.getFirst());
+                    info.setLanguages(commentaryAndLanguages.getSecond());
+
                     raiderIODataList.add(data);
                 } catch (Exception e) {
                     log.error("Failed to fetch and save RaiderIOData for character: " + info.getName(), e);
@@ -107,19 +112,20 @@ public class WowDataCrawlerService {
                 .build();
     }
 
-    public String fetchCharacterCommentary(CharacterInfo characterInfo) {
+    public Pair<String, String> fetchCharacterCommentaryAndLanguages(CharacterInfo characterInfo) {
         try {
-            String url = "https://www.wowprogress.com/character/" + characterInfo.getRegion() + "/" + characterInfo.getRealm() + "/" + characterInfo.getName();
+            String url = "https://www.wowprogress.com/character/" + characterInfo.getRegion() + "/" + characterInfo.getRealm().replace(" ","-") + "/" + characterInfo.getName();
             Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
             Element commentaryElement = doc.select("div.charCommentary").first();
-            if (Objects.nonNull(commentaryElement)) {
-                return commentaryElement.text();
-            } else {
-                return "No Commentary Available";
-            }
+            Element languagesElement = doc.select("div.language:contains(Languages)").first();
+
+            String commentary = (commentaryElement != null) ? commentaryElement.text() : "No Commentary Available";
+            String languages = (languagesElement != null) ? languagesElement.text().replace("Languages: ", "") : "No Languages Available";
+
+            return Pair.of(commentary, languages);
         } catch (IOException e) {
-            log.error("Failed to fetch character commentary for character: " + characterInfo.getName());
-            return "No Commentary Available";
+            log.error("Failed to fetch character commentary and languages for character: " + characterInfo.getName());
+            return Pair.of("No Commentary Available", "No Languages Available");
         }
     }
 

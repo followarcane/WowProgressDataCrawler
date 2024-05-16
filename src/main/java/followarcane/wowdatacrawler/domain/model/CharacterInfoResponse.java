@@ -13,6 +13,8 @@ public class CharacterInfoResponse {
     private String region;
     private String realm;
     private String iLevel;
+    private String commentary;
+    private String languages;
     private RaiderIODataResponse raiderIODataResponse;
     private List<RaidProgressionResponse> raidProgressions;
 }

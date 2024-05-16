@@ -24,6 +24,7 @@ public class CharacterInfo {
     private String ranking;
     @Column(length = 2000)
     private String commentary;
+    private String languages;
 
     @JsonIgnore
     private boolean isRussian = false;

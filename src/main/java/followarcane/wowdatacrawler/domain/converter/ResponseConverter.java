@@ -36,7 +36,7 @@ public class ResponseConverter {
                 .region(characterInfo.getRegion())
                 .realm(characterInfo.getRealm())
                 .iLevel(characterInfo.getRanking())
-                .raiderIODataResponse(raiderIODataResponse)
+                .raiderIOData(raiderIODataResponse)
                 .raidProgressions(raidProgressions)
                 .commentary(characterInfo.getCommentary())
                 .languages(characterInfo.getLanguages())

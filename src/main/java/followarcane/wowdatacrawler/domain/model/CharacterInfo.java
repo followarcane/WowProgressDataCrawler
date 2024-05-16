@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 @Data
 @Entity(name = "character_info")
+@ToString(exclude = {"raiderIOData", "raidProgressions"})
 public class CharacterInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +22,8 @@ public class CharacterInfo {
     private String region;
     private String realm;
     private String ranking;
+    @Column(length = 2000)
+    private String commentary;
 
     @JsonIgnore
     private boolean isRussian = false;

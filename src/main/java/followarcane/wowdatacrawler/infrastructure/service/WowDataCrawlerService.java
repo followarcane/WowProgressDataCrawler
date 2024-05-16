@@ -39,7 +39,7 @@ public class WowDataCrawlerService {
 
     @Scheduled(fixedRate = 30000)
     public void scheduleFixedRateTask() {
-        List<CharacterInfo> list = crawlCharacterInfoFromWeb(wowProgressUrl);
+        List<CharacterInfo> list = crawlWowProgress(wowProgressUrl);
         List<RaiderIOData> raiderIODataList = new ArrayList<>();
 
         if (!isFirstElementEqual(list, lastFetchedData)) {
@@ -51,6 +51,7 @@ public class WowDataCrawlerService {
                 try {
                     RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
                     info.setRaiderIOData(data);
+                    info.setCommentary(fetchCharacterCommentary(info));
                     raiderIODataList.add(data);
                 } catch (Exception e) {
                     log.error("Failed to fetch and save RaiderIOData for character: " + info.getName(), e);
@@ -65,7 +66,7 @@ public class WowDataCrawlerService {
     }
 
 
-    public List<CharacterInfo> crawlCharacterInfoFromWeb(String url) {
+    public List<CharacterInfo> crawlWowProgress(String url) {
         try {
             Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
             Elements rows = doc.select("table.rating > tbody > tr");
@@ -104,6 +105,22 @@ public class WowDataCrawlerService {
                 .ranking(characterScore)
                 .isRussian(regionFullName.contains("(RU)"))
                 .build();
+    }
+
+    public String fetchCharacterCommentary(CharacterInfo characterInfo) {
+        try {
+            String url = "https://www.wowprogress.com/character/" + characterInfo.getRegion() + "/" + characterInfo.getRealm() + "/" + characterInfo.getName();
+            Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
+            Element commentaryElement = doc.select("div.charCommentary").first();
+            if (Objects.nonNull(commentaryElement)) {
+                return commentaryElement.text();
+            } else {
+                return "No Commentary Available";
+            }
+        } catch (IOException e) {
+            log.error("Failed to fetch character commentary for character: " + characterInfo.getName());
+            return "No Commentary Available";
+        }
     }
 
     private boolean isFirstElementEqual(List<CharacterInfo> list1, List<CharacterInfo> list2) {

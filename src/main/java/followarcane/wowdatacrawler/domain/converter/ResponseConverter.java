@@ -1,5 +1,9 @@
 package followarcane.wowdatacrawler.domain.converter;
 
+import followarcane.wowdatacrawler.api.v1.Responses.CharacterInfoResponse;
+import followarcane.wowdatacrawler.api.v1.Responses.RaidProgressionResponse;
+import followarcane.wowdatacrawler.api.v1.Responses.RaiderIODataResponse;
+import followarcane.wowdatacrawler.api.v1.Responses.UserResponse;
 import followarcane.wowdatacrawler.domain.model.*;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +64,28 @@ public class ResponseConverter {
         return RaidProgressionResponse.builder()
                 .raidName(raidProgression.getRaidName())
                 .summary(raidProgression.getSummary())
+                .build();
+    }
+
+    public UserResponse convertUser(User user) {
+        return UserResponse.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+    }
+
+    public List<UserResponse> convertUser(List<User> listUser) {
+        return listUser.stream()
+                .map(ResponseConverter::convert)
+                .collect(Collectors.toList());
+    }
+
+    public static UserResponse convert(User user) {
+        return UserResponse.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole())
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package followarcane.wowdatacrawler.domain.model;
+package followarcane.wowdatacrawler.api.v1.Responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

@@ -24,7 +24,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(requestResponseLoggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/api/v1/wdc/**").hasRole("FAKE_ADMIN")
+                .antMatchers("/api/v1/wdc/**").hasRole("FAKE_ADMIN")//@todo: change this to ROLE_ADMIN
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic()

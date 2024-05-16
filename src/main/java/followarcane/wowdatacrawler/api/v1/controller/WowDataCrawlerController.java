@@ -2,7 +2,7 @@ package followarcane.wowdatacrawler.api.v1.controller;
 
 import followarcane.wowdatacrawler.domain.converter.ResponseConverter;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
-import followarcane.wowdatacrawler.domain.model.CharacterInfoResponse;
+import followarcane.wowdatacrawler.api.v1.Responses.CharacterInfoResponse;
 import followarcane.wowdatacrawler.infrastructure.service.CharacterInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

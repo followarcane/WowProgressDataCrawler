@@ -20,7 +20,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             User user = new User();
             user.setUsername("pyro");
             user.setPassword(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("pyro"));
-            user.setRole("FAKE_ADMIN");
+            user.setRole("ROLE_ADMIN");
 
             userRepository.save(user);
         }

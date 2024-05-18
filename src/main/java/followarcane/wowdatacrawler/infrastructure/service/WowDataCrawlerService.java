@@ -120,6 +120,9 @@ public class WowDataCrawlerService {
             Element languagesElement = doc.select("div.language:contains(Languages)").first();
 
             String commentary = (commentaryElement != null) ? commentaryElement.text() : "No Commentary Available";
+            if (commentary.length() > 1997) {
+                commentary = commentary.substring(0, 1997) + "..";
+            }
             String languages = (languagesElement != null) ? languagesElement.text().replace("Languages: ", "") : "No Languages Available";
 
             return Pair.of(commentary, languages);

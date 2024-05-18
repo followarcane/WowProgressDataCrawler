@@ -24,12 +24,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(requestResponseLoggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/api/v1/wdc/**").hasRole("FAKE_ADMIN")//@todo: change this to ROLE_ADMIN
+                .antMatchers("/api/v1/wdc/**").hasRole("ADMIN")
+                .antMatchers("/api/v1/user/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic()
-                .and()
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+                .httpBasic();
     }
 
     @Override

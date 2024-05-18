@@ -1,1 +1,2 @@
-- Player logs will be crawled from warcraftlogs.com.
+- UserController Auth problems
+- Security Checks???

@@ -1,7 +1,9 @@
 package followarcane.wowdatacrawler.infrastructure.service;
 
-import followarcane.wowdatacrawler.api.v1.Requests.CreateUserCommand;
-import followarcane.wowdatacrawler.api.v1.Requests.UpdateUserCommand;
+import followarcane.wowdatacrawler.api.v1.error.UserAlreadyExistsException;
+import followarcane.wowdatacrawler.api.v1.error.UserNotFoundException;
+import followarcane.wowdatacrawler.api.v1.requests.CreateUserCommand;
+import followarcane.wowdatacrawler.api.v1.requests.UpdateUserCommand;
 import followarcane.wowdatacrawler.domain.model.User;
 import followarcane.wowdatacrawler.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -23,10 +26,16 @@ public class UserService {
     }
 
     public User createUser(CreateUserCommand createUserCommand) {
+        User user = userRepository.findByUsername(createUserCommand.getUsername());
+        if (Objects.nonNull(user)) {
+            throw new UserAlreadyExistsException();
+        }
+
         return userRepository.save(User.builder()
                 .username(createUserCommand.getUsername())
                 .password(passwordEncoder.encode(createUserCommand.getPassword()))
-                .role(createUserCommand.getRole())
+                .email(createUserCommand.getEmail())
+                .role(createUserCommand.getRole().name())
                 .enabled(true)
                 .build());
     }
@@ -34,7 +43,7 @@ public class UserService {
     public User updateUser(Long id, UpdateUserCommand updateUserCommand) {
         User user = getUser(id);
         user.setUsername(updateUserCommand.getUsername());
-        user.setRole(updateUserCommand.getRole());
+        user.setRole(updateUserCommand.getRole().name());
         user.setEmail(updateUserCommand.getEmail());
 
         return userRepository.save(user);
@@ -42,6 +51,7 @@ public class UserService {
 
     public void deleteUser(Long id) {
         User user = getUser(id);
+        user.setEnabled(false);
         userRepository.save(user);
     }
 
@@ -49,7 +59,7 @@ public class UserService {
     private User getUser(Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException();
         }
         return user.get();
     }

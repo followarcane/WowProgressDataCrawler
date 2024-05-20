@@ -1,9 +1,9 @@
 package followarcane.wowdatacrawler.domain.converter;
 
-import followarcane.wowdatacrawler.api.v1.Responses.CharacterInfoResponse;
-import followarcane.wowdatacrawler.api.v1.Responses.RaidProgressionResponse;
-import followarcane.wowdatacrawler.api.v1.Responses.RaiderIODataResponse;
-import followarcane.wowdatacrawler.api.v1.Responses.UserResponse;
+import followarcane.wowdatacrawler.api.v1.responses.CharacterInfoResponse;
+import followarcane.wowdatacrawler.api.v1.responses.RaidProgressionResponse;
+import followarcane.wowdatacrawler.api.v1.responses.RaiderIODataResponse;
+import followarcane.wowdatacrawler.api.v1.responses.UserResponse;
 import followarcane.wowdatacrawler.domain.model.*;
 import org.springframework.stereotype.Component;
 

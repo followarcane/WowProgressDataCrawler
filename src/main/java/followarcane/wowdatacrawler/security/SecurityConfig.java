@@ -1,5 +1,6 @@
 package followarcane.wowdatacrawler.security;
 
+import followarcane.wowdatacrawler.infrastructure.utils.Authorities;
 import followarcane.wowdatacrawler.security.logger.RequestResponseLoggingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(requestResponseLoggingFilter, UsernamePasswordAuthenticationFilter.class)
+                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/v1/wdc/**").hasAnyRole("ADMIN", "USER")
-                .antMatchers("/api/v1/user/**").hasRole("ADMIN")
+                .antMatchers("/api/v1/wdc/**").hasAnyRole(Authorities.USER.name(), Authorities.ADMIN.name())
+                .antMatchers("/api/v1/user/**").hasRole(Authorities.ADMIN.name())
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();

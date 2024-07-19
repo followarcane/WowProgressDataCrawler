@@ -114,12 +114,12 @@ public class WowDataCrawlerService {
 
     public Pair<String, String> fetchCharacterCommentaryAndLanguages(CharacterInfo characterInfo) {
         try {
-            String url = "https://www.wowprogress.com/character/" + characterInfo.getRegion() + "/" + characterInfo.getRealm().replace(" ","-") + "/" + characterInfo.getName();
+            String url = "https://www.wowprogress.com/character/" + characterInfo.getRegion() + "/" + characterInfo.getRealm().replace(" ", "-") + "/" + characterInfo.getName();
             Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
             Element commentaryElement = doc.select("div.charCommentary").first();
             Element languagesElement = doc.select("div.language:contains(Languages)").first();
 
-            String commentary = (commentaryElement != null) ? commentaryElement.html() : "No Commentary Available";
+            String commentary = (commentaryElement != null) ? convertHtmlToText(commentaryElement.html()) : "No Commentary Available";
             if (commentary.length() > 1997) {
                 commentary = commentary.substring(0, 1997) + "..";
             }
@@ -127,9 +127,16 @@ public class WowDataCrawlerService {
 
             return Pair.of(commentary, languages);
         } catch (IOException e) {
-            log.error("Failed to fetch character commentary and languages for character: " + characterInfo.getName());
+            log.error("Failed to fetch character commentary and languages for character: " + characterInfo.getName(), e);
             return Pair.of("No Commentary Available", "No Languages Available");
         }
+    }
+
+    private String convertHtmlToText(String html) {
+        if (html == null) {
+            return "";
+        }
+        return html.replaceAll("<br>", "\n").replaceAll("<[^>]+>", "");
     }
 
     private boolean isFirstElementEqual(List<CharacterInfo> list1, List<CharacterInfo> list2) {

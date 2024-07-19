@@ -119,7 +119,7 @@ public class WowDataCrawlerService {
             Element commentaryElement = doc.select("div.charCommentary").first();
             Element languagesElement = doc.select("div.language:contains(Languages)").first();
 
-            String commentary = (commentaryElement != null) ? commentaryElement.text() : "No Commentary Available";
+            String commentary = (commentaryElement != null) ? commentaryElement.html() : "No Commentary Available";
             if (commentary.length() > 1997) {
                 commentary = commentary.substring(0, 1997) + "..";
             }

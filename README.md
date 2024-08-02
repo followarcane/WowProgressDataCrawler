@@ -1,5 +1,7 @@
 # WowProgressDataCrawler
 
+**This project is an open-source service designed for use by [Azerite.app](https://azerite.app).**
+
 ## Introduction
 
 WowProgressDataCrawler is a web application built using Java 17, Jakarta EE, Spring Data JPA, Spring MVC, Lombok, and Jsoup. The application is designed to scrape character data from wowprogress.com, parse it, and update a list that can be reused.

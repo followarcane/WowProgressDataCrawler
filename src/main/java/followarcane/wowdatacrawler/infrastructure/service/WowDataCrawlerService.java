@@ -42,6 +42,7 @@ public class WowDataCrawlerService {
     public void scheduleFixedRateTask() {
         List<CharacterInfo> list = crawlWowProgress(wowProgressUrl);
         List<RaiderIOData> raiderIODataList = new ArrayList<>();
+        log.info("Fetched {} player.", list.size());
 
         if (!isFirstElementEqual(list, lastFetchedData)) {
             lastFetchedData = list;
@@ -95,6 +96,10 @@ public class WowDataCrawlerService {
 
         if (characterName.isEmpty() || regionFullName.isEmpty()) {
             return null;
+        }
+
+        if (regionFullName.contains("OC")) {
+            regionFullName = regionFullName.replace("OC", "US");
         }
 
         String[] splitRegion = regionFullName.split("-");

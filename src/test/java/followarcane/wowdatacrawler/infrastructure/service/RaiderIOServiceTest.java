@@ -29,16 +29,16 @@ class RaiderIOServiceTest {
     @Test
     void testFetchRaiderIOData_WithSpecialCharacters() {
         CharacterInfo characterInfo = CharacterInfo.builder()
-                .name("Триндллок")
+                .name("Данканчик")
                 .region("eu")
-                .realm("ревущий-фьорд")
+                .realm("Гордунни")
                 .build();
 
         RaiderIOData result = raiderIOService.fetchRaiderIOData(characterInfo);
 
         assertNotNull(result);
-        assertEquals("Триндллок", result.getName());
+        assertEquals("Данканчик", result.getName());
         assertEquals("eu", result.getRegion());
-        assertEquals("ревущий-фьорд", result.getRealm());
+        assertEquals("Gordunni", result.getRealm());
     }
 }

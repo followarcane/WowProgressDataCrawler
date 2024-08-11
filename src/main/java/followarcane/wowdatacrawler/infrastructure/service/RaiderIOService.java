@@ -19,8 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor = @__({@Autowired}))
 @Slf4j
 public class RaiderIOService {
+
     private final RaiderIODataRepository raiderIODataRepository;
     private final TranslationService translationService;
 
@@ -43,40 +43,39 @@ public class RaiderIOService {
         raiderIODataRepository.deleteAll();
     }
 
-    //@todo: Russian names are not supported in Raider.IO API. Check it later. Example : "Ревущий-фьорд"
     @SneakyThrows
     public RaiderIOData fetchRaiderIOData(CharacterInfo info) {
-        String encodedRealm = URLEncoder.encode(info.getRealm().replace(" ", "-"), StandardCharsets.UTF_8);
-        String encodedName = URLEncoder.encode(info.getName(), StandardCharsets.UTF_8);
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(raiderIOUrl)
-                .queryParam("region", info.getRegion())
-                .queryParam("realm", encodedRealm)
-                .queryParam("name", encodedName)
-                .queryParam("fields", "raid_progression");
+        String realm = info.getRealm().replace(" ", "-");
+        String name = info.getName();
 
-        String requestUrl = builder.build().toUriString();
+        // URI'yi oluşturmak ve encoding işlemini doğru şekilde yapmak için UriComponentsBuilder kullanın
+        URI uri = UriComponentsBuilder.fromHttpUrl(raiderIOUrl)
+                .queryParam("region", info.getRegion())
+                .queryParam("realm", realm)
+                .queryParam("name", name)
+                .queryParam("fields", "raid_progression")
+                .build()
+                .encode()
+                .toUri();
 
         RaiderIOData partialData = new RaiderIOData();
-        // Set the fields directly from the character info
         partialData.setName(info.getName());
         partialData.setRegion(info.getRegion());
         partialData.setRealm(info.getRealm());
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.getForEntity(requestUrl, String.class);
+            ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
 
             if (response.getStatusCodeValue() == 200 && response.hasBody()) {
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 partialData = mapper.readValue(response.getBody(), RaiderIOData.class);
 
-                // Get the raid_progression field from the response body
                 Map<String, Object> responseBodyMap = mapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>() {
                 });
                 String raidProgressionJson = mapper.writeValueAsString(responseBodyMap.get("raid_progression"));
 
-                // Parse the raidProgressionJson string into a Map
                 Map<String, Map<String, Object>> raidProgressionMap = mapper.readValue(raidProgressionJson, new TypeReference<Map<String, Map<String, Object>>>() {
                 });
 
@@ -89,14 +88,14 @@ public class RaiderIOService {
                     raidProgressions.add(raidProgression);
                 }
                 info.setRaidProgressions(raidProgressions);
-                Thread.sleep(300);
+                Thread.sleep(300); // API rate limiting
             }
         } catch (RestClientException | IOException e) {
-            log.error("Failed to fetch data from Raider IO for character: " + info.getName() + ". \nRequest URL: " + requestUrl, e);
+            log.error("Failed to fetch data from Raider IO for character: " + info.getName() + ". \nRequest URI: " + uri, e);
         }
-        // return `partialData` in all cases, even it failed to fetch additional data from RaiderIO
         return partialData;
     }
+
 
     private String formatRaidName(String raidName) {
         String[] words = raidName.split("-");
@@ -106,3 +105,4 @@ public class RaiderIOService {
         return String.join(" ", words);
     }
 }
+

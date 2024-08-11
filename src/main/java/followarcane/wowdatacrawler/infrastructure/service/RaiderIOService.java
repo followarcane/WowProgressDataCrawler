@@ -1,13 +1,11 @@
 package followarcane.wowdatacrawler.infrastructure.service;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.RaidProgression;
 import followarcane.wowdatacrawler.domain.model.RaiderIOData;
-import followarcane.wowdatacrawler.infrastructure.repository.RaidProgressionRepository;
 import followarcane.wowdatacrawler.infrastructure.repository.RaiderIODataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -21,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +46,12 @@ public class RaiderIOService {
     //@todo: Russian names are not supported in Raider.IO API. Check it later. Example : "Ревущий-фьорд"
     @SneakyThrows
     public RaiderIOData fetchRaiderIOData(CharacterInfo info) {
-        //String realmName = info.isRussian() ? translationService.translateText(info.getRealm(), "en") : info.getRealm();
+        String encodedRealm = URLEncoder.encode(info.getRealm().replace(" ", "-"), StandardCharsets.UTF_8);
+        String encodedName = URLEncoder.encode(info.getName(), StandardCharsets.UTF_8);
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(raiderIOUrl)
                 .queryParam("region", info.getRegion())
-                .queryParam("realm", info.getRealm().replace(" ", "-"))
-                .queryParam("name", info.getName())
+                .queryParam("realm", encodedRealm)
+                .queryParam("name", encodedName)
                 .queryParam("fields", "raid_progression");
 
         String requestUrl = builder.build().toUriString();

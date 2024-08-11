@@ -16,6 +16,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,7 +73,6 @@ public class WowDataCrawlerService {
         }
     }
 
-
     public List<CharacterInfo> crawlWowProgress(String url) {
         try {
             Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
@@ -119,7 +120,9 @@ public class WowDataCrawlerService {
 
     public Pair<String, String> fetchCharacterCommentaryAndLanguages(CharacterInfo characterInfo) {
         try {
-            String url = "https://www.wowprogress.com/character/" + characterInfo.getRegion() + "/" + characterInfo.getRealm().replace(" ", "-") + "/" + characterInfo.getName();
+            String encodedRealm = URLEncoder.encode(characterInfo.getRealm().replace(" ", "-"), StandardCharsets.UTF_8);
+            String encodedName = URLEncoder.encode(characterInfo.getName(), StandardCharsets.UTF_8);
+            String url = "https://www.wowprogress.com/character/" + characterInfo.getRegion() + "/" + encodedRealm + "/" + encodedName;
             Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
             Element commentaryElement = doc.select("div.charCommentary").first();
             Element languagesElement = doc.select("div.language:contains(Languages)").first();

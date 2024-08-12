@@ -45,10 +45,9 @@ public class RaiderIOService {
 
     @SneakyThrows
     public RaiderIOData fetchRaiderIOData(CharacterInfo info) {
-        String realm = info.getRealm().replace(" ", "-");
+        String realm = info.getRealm();
         String name = info.getName();
 
-        // URI'yi oluşturmak ve encoding işlemini doğru şekilde yapmak için UriComponentsBuilder kullanın
         URI uri = UriComponentsBuilder.fromHttpUrl(raiderIOUrl)
                 .queryParam("region", info.getRegion())
                 .queryParam("realm", realm)
@@ -88,7 +87,7 @@ public class RaiderIOService {
                     raidProgressions.add(raidProgression);
                 }
                 info.setRaidProgressions(raidProgressions);
-                Thread.sleep(300); // API rate limiting
+                Thread.sleep(300);
             }
         } catch (RestClientException | IOException e) {
             log.error("Failed to fetch data from Raider IO for character: " + info.getName() + ". \nRequest URI: " + uri, e);

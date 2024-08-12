@@ -23,6 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'com.google.cloud:google-cloud-translate:1.95.3'
+    implementation 'org.json:json:20230227'
     implementation 'jakarta.persistence:jakarta.persistence-api:2.2.3'
     runtimeOnly 'com.h2database:h2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

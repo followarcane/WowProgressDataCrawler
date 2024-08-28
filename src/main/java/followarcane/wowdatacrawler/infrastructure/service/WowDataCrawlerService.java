@@ -2,6 +2,7 @@ package followarcane.wowdatacrawler.infrastructure.service;
 
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.RaiderIOData;
+import followarcane.wowdatacrawler.domain.model.WCLRanking;
 import followarcane.wowdatacrawler.infrastructure.utils.Regions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class WowDataCrawlerService {
 
     private final CharacterInfoService characterInfoService;
     private final RaiderIOService raiderIOService;
+    private final WarcraftlogsService warcraftlogsService;
 
     private List<CharacterInfo> lastFetchedData = new ArrayList<>();
 
@@ -55,6 +57,8 @@ public class WowDataCrawlerService {
                 try {
                     RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
                     info.setRaiderIOData(data);
+
+                    List<WCLRanking> wclResponse = warcraftlogsService.getCharacterRankings(info.getName(), info.getRealm(), info.getRegion());
 
                     Pair<String, String> commentaryAndLanguages = fetchCharacterCommentaryAndLanguages(info);
                     info.setCommentary(commentaryAndLanguages.getFirst());

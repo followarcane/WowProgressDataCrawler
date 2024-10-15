@@ -2,6 +2,9 @@ package followarcane.wowdatacrawler.infrastructure.service;
 
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.RaiderIOData;
+import followarcane.wowdatacrawler.domain.model.WarcraftLogsData;
+import followarcane.wowdatacrawler.infrastructure.service.repoService.CharacterInfoService;
+import followarcane.wowdatacrawler.infrastructure.service.repoService.WarcraftLogsDataService;
 import followarcane.wowdatacrawler.infrastructure.utils.Regions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,8 @@ public class WowDataCrawlerService {
 
     private final CharacterInfoService characterInfoService;
     private final RaiderIOService raiderIOService;
+    private final WarcraftLogsService warcraftLogsService;
+    private final WarcraftLogsDataService warcraftLogsDataService;
 
     private List<CharacterInfo> lastFetchedData = new ArrayList<>();
 
@@ -44,17 +49,28 @@ public class WowDataCrawlerService {
     public void scheduleFixedRateTask() {
         List<CharacterInfo> list = crawlWowProgress(wowProgressUrl);
         List<RaiderIOData> raiderIODataList = new ArrayList<>();
+        List<WarcraftLogsData> warcraftLogsDataList = new ArrayList<>();
         log.info("Fetched {} player.", list.size());
 
         if (!isFirstElementEqual(list, lastFetchedData)) {
             lastFetchedData = list;
+            warcraftLogsDataService.deleteAll();
             characterInfoService.deleteAll();
             raiderIOService.deleteAll();
+
+            String warcraftLogsToken = warcraftLogsService.authenticate().orElse(null);
+            if (warcraftLogsToken == null) {
+                log.error("Failed to authenticate with WarcraftLogs, skipping WarcraftLogs data fetching.");
+                return;
+            }
 
             for (CharacterInfo info : list) {
                 try {
                     RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
                     info.setRaiderIOData(data);
+
+                    warcraftLogsService.fetchCharacterData(warcraftLogsToken, info)
+                            .ifPresent(warcraftLogsDataList::add);
 
                     Pair<String, String> commentaryAndLanguages = fetchCharacterCommentaryAndLanguages(info);
                     info.setCommentary(commentaryAndLanguages.getFirst());
@@ -62,12 +78,13 @@ public class WowDataCrawlerService {
 
                     raiderIODataList.add(data);
                 } catch (Exception e) {
-                    log.error("Failed to fetch and save RaiderIOData for character: " + info.getName(), e);
+                    log.error("Failed to fetch and save data for character: " + info.getName(), e);
                 }
             }
             log.info("New data found! Saving to database...");
             characterInfoService.saveAll(list);
             raiderIOService.saveAll(raiderIODataList);
+            warcraftLogsService.saveAll(warcraftLogsDataList);
         } else {
             log.info("No new data found!");
         }
@@ -155,3 +172,4 @@ public class WowDataCrawlerService {
         return Objects.equals(list1.get(0).getName(), list2.get(0).getName());
     }
 }
+

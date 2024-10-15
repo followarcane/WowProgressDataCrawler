@@ -17,4 +17,6 @@ public class CharacterInfoResponse {
     private String languages;
     private RaiderIODataResponse raiderIOData;
     private List<RaidProgressionResponse> raidProgressions;
+    private WarcraftLogsDataResponse warcraftLogsData;
+    private List<BossRankResponse> bossRanks;
 }

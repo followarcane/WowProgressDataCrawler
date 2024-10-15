@@ -1,4 +1,4 @@
-package followarcane.wowdatacrawler.infrastructure.service;
+package followarcane.wowdatacrawler.infrastructure.service.repoService;
 
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.infrastructure.repository.CharacterInfoRepository;

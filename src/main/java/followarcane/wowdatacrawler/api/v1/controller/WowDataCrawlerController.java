@@ -3,7 +3,7 @@ package followarcane.wowdatacrawler.api.v1.controller;
 import followarcane.wowdatacrawler.domain.converter.ResponseConverter;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.api.v1.responses.CharacterInfoResponse;
-import followarcane.wowdatacrawler.infrastructure.service.CharacterInfoService;
+import followarcane.wowdatacrawler.infrastructure.service.repoService.CharacterInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

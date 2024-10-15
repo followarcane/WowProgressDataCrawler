@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @Data
 @Entity(name = "character_info")
-@ToString(exclude = {"raiderIOData", "raidProgressions"})
+@ToString(exclude = {"raiderIOData", "raidProgressions", "warcraftLogsData", "bossRanks"})
 public class CharacterInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +35,11 @@ public class CharacterInfo {
 
     @OneToMany(mappedBy = "characterInfo", cascade = CascadeType.ALL)
     private List<RaidProgression> raidProgressions;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "warcraft_logs_data_id", referencedColumnName = "id")
+    private WarcraftLogsData warcraftLogsData;
+
+    @OneToMany(mappedBy = "characterInfo", cascade = CascadeType.ALL)
+    private List<BossRank> bossRanks;
 }

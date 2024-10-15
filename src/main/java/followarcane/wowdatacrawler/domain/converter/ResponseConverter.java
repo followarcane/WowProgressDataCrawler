@@ -1,9 +1,6 @@
 package followarcane.wowdatacrawler.domain.converter;
 
-import followarcane.wowdatacrawler.api.v1.responses.CharacterInfoResponse;
-import followarcane.wowdatacrawler.api.v1.responses.RaidProgressionResponse;
-import followarcane.wowdatacrawler.api.v1.responses.RaiderIODataResponse;
-import followarcane.wowdatacrawler.api.v1.responses.UserResponse;
+import followarcane.wowdatacrawler.api.v1.responses.*;
 import followarcane.wowdatacrawler.domain.model.*;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +31,18 @@ public class ResponseConverter {
                     .collect(Collectors.toList());
         }
 
+        List<BossRankResponse> bossRanks = null;
+        if (characterInfo.getBossRanks() != null) {
+            bossRanks = characterInfo.getBossRanks().stream()
+                    .map(ResponseConverter::convert)
+                    .collect(Collectors.toList());
+        }
+
+        WarcraftLogsDataResponse warcraftLogsDataResponse = null;
+        if (characterInfo.getWarcraftLogsData() != null) {
+            warcraftLogsDataResponse = convert(characterInfo.getWarcraftLogsData());
+        }
+
         return CharacterInfoResponse.builder()
                 .name(characterInfo.getName())
                 .guild(Objects.isNull(characterInfo.getGuild()) ? "No Guild" : characterInfo.getGuild())
@@ -44,6 +53,8 @@ public class ResponseConverter {
                 .raidProgressions(raidProgressions)
                 .commentary(characterInfo.getCommentary())
                 .languages(characterInfo.getLanguages())
+                .bossRanks(bossRanks)
+                .warcraftLogsData(warcraftLogsDataResponse)
                 .build();
     }
 
@@ -64,6 +75,22 @@ public class ResponseConverter {
         return RaidProgressionResponse.builder()
                 .raidName(raidProgression.getRaidName())
                 .summary(raidProgression.getSummary())
+                .build();
+    }
+
+    public static BossRankResponse convert(BossRank bossRank) {
+        return BossRankResponse.builder()
+                .encounterName(bossRank.getEncounterName())
+                .rankPercent(bossRank.getRankPercent())
+                .build();
+    }
+
+    public static WarcraftLogsDataResponse convert(WarcraftLogsData warcraftLogsData) {
+        return WarcraftLogsDataResponse.builder()
+                .zoneName(warcraftLogsData.getZoneName())
+                .metric(warcraftLogsData.getMetric())
+                .difficulty(warcraftLogsData.getDifficulty())
+                .bestPerformanceAverage(warcraftLogsData.getBestPerformanceAverage())
                 .build();
     }
 

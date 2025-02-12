@@ -45,7 +45,7 @@ public class WowDataCrawlerService {
     @Value("${properties.wowprogress.limit}")
     private Long wowProgressLimit;
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 60000)
     public void scheduleFixedRateTask() {
         List<CharacterInfo> list = crawlWowProgress(wowProgressUrl);
         List<RaiderIOData> raiderIODataList = new ArrayList<>();
@@ -54,8 +54,8 @@ public class WowDataCrawlerService {
 
         if (!isFirstElementEqual(list, lastFetchedData)) {
             lastFetchedData = list;
-            warcraftLogsDataService.deleteAll();
             characterInfoService.deleteAll();
+            warcraftLogsDataService.deleteAll();
             raiderIOService.deleteAll();
 
             String warcraftLogsToken = warcraftLogsService.authenticate().orElse(null);
@@ -137,22 +137,49 @@ public class WowDataCrawlerService {
 
     public Pair<String, String> fetchCharacterCommentaryAndLanguages(CharacterInfo characterInfo) {
         try {
+            // URL encoding
             String encodedRealm = URLEncoder.encode(characterInfo.getRealm().replace(" ", "-"), StandardCharsets.UTF_8);
             String encodedName = URLEncoder.encode(characterInfo.getName(), StandardCharsets.UTF_8);
             String url = "https://www.wowprogress.com/character/" + characterInfo.getRegion() + "/" + encodedRealm + "/" + encodedName;
-            Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
+
+            // Add delay to avoid rate limiting
+            Thread.sleep(2000);
+
+            // Fetch document with enhanced configuration
+            Document doc = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+                    .header("Accept-Language", "en-US,en;q=0.5")
+                    .header("Accept-Encoding", "gzip, deflate, br")
+                    .header("Connection", "keep-alive")
+                    .timeout(10000)
+                    .maxBodySize(0)
+                    .followRedirects(true)
+                    .get();
+
+            // Parse the content
             Element commentaryElement = doc.select("div.charCommentary").first();
             Element languagesElement = doc.select("div.language:contains(Languages)").first();
 
+            // Process commentary
             String commentary = (commentaryElement != null) ? convertHtmlToText(commentaryElement.html()) : "No Commentary Available";
             if (commentary.length() > 1997) {
                 commentary = commentary.substring(0, 1997) + "..";
             }
-            String languages = (languagesElement != null) ? languagesElement.text().replace("Languages: ", "") : "No Languages Available";
+
+            // Process languages
+            String languages = (languagesElement != null) ?
+                    languagesElement.text().replace("Languages: ", "") :
+                    "No Languages Available";
 
             return Pair.of(commentary, languages);
+
         } catch (IOException e) {
             log.error("Failed to fetch character commentary and languages for character: " + characterInfo.getName(), e);
+            return Pair.of("No Commentary Available", "No Languages Available");
+        } catch (InterruptedException e) {
+            log.error("Sleep interrupted while fetching data for character: " + characterInfo.getName(), e);
+            Thread.currentThread().interrupt(); // Restore interrupted status
             return Pair.of("No Commentary Available", "No Languages Available");
         }
     }

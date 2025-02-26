@@ -3,8 +3,10 @@ package followarcane.wowdatacrawler.infrastructure.service;
 import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.RaiderIOData;
 import followarcane.wowdatacrawler.domain.model.WarcraftLogsData;
+import followarcane.wowdatacrawler.infrastructure.service.proxy.TorProxyManager;
 import followarcane.wowdatacrawler.infrastructure.service.repoService.CharacterInfoService;
 import followarcane.wowdatacrawler.infrastructure.service.repoService.WarcraftLogsDataService;
+import followarcane.wowdatacrawler.infrastructure.service.version.VersionNotifierService;
 import followarcane.wowdatacrawler.infrastructure.utils.Regions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,8 @@ public class WowDataCrawlerService {
     private final RaiderIOService raiderIOService;
     private final WarcraftLogsService warcraftLogsService;
     private final WarcraftLogsDataService warcraftLogsDataService;
+    private final TorProxyManager torManager;
+    private final VersionNotifierService versionNotifier;
 
     private List<CharacterInfo> lastFetchedData = new ArrayList<>();
 
@@ -45,54 +49,72 @@ public class WowDataCrawlerService {
     @Value("${properties.wowprogress.limit}")
     private Long wowProgressLimit;
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 180000)
     public void scheduleFixedRateTask() {
-        List<CharacterInfo> list = crawlWowProgress(wowProgressUrl);
-        List<RaiderIOData> raiderIODataList = new ArrayList<>();
-        List<WarcraftLogsData> warcraftLogsDataList = new ArrayList<>();
-        log.info("Fetched {} player.", list.size());
+        try {
+            List<CharacterInfo> list = crawlWowProgress(wowProgressUrl);
+            List<RaiderIOData> raiderIODataList = new ArrayList<>();
+            List<WarcraftLogsData> warcraftLogsDataList = new ArrayList<>();
+            log.info("Fetched {} player.", list.size());
 
-        if (!isFirstElementEqual(list, lastFetchedData)) {
-            lastFetchedData = list;
-            characterInfoService.deleteAll();
-            warcraftLogsDataService.deleteAll();
-            raiderIOService.deleteAll();
+            if (!isFirstElementEqual(list, lastFetchedData)) {
+                lastFetchedData = list;
+                characterInfoService.deleteAll();
+                warcraftLogsDataService.deleteAll();
+                raiderIOService.deleteAll();
 
-            String warcraftLogsToken = warcraftLogsService.authenticate().orElse(null);
-            if (warcraftLogsToken == null) {
-                log.error("Failed to authenticate with WarcraftLogs, skipping WarcraftLogs data fetching.");
-                return;
-            }
-
-            for (CharacterInfo info : list) {
-                try {
-                    RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
-                    info.setRaiderIOData(data);
-
-                    warcraftLogsService.fetchCharacterData(warcraftLogsToken, info)
-                            .ifPresent(warcraftLogsDataList::add);
-
-                    Pair<String, String> commentaryAndLanguages = fetchCharacterCommentaryAndLanguages(info);
-                    info.setCommentary(commentaryAndLanguages.getFirst());
-                    info.setLanguages(commentaryAndLanguages.getSecond());
-
-                    raiderIODataList.add(data);
-                } catch (Exception e) {
-                    log.error("Failed to fetch and save data for character: " + info.getName(), e);
+                String warcraftLogsToken = warcraftLogsService.authenticate().orElse(null);
+                if (warcraftLogsToken == null) {
+                    log.error("Failed to authenticate with WarcraftLogs, skipping WarcraftLogs data fetching.");
+                    return;
                 }
+
+                for (CharacterInfo info : list) {
+                    try {
+                        RaiderIOData data = raiderIOService.fetchRaiderIOData(info);
+                        info.setRaiderIOData(data);
+
+                        warcraftLogsService.fetchCharacterData(warcraftLogsToken, info)
+                                .ifPresent(warcraftLogsDataList::add);
+
+                        Pair<String, String> commentaryAndLanguages = fetchCharacterCommentaryAndLanguages(info);
+                        info.setCommentary(commentaryAndLanguages.getFirst());
+                        info.setLanguages(commentaryAndLanguages.getSecond());
+
+                        raiderIODataList.add(data);
+                    } catch (Exception e) {
+                        log.error("Failed to fetch and save data for character: " + info.getName(), e);
+                    }
+                }
+                log.info("New data found! Saving to database...");
+                characterInfoService.saveAll(list);
+                raiderIOService.saveAll(raiderIODataList);
+                warcraftLogsService.saveAll(warcraftLogsDataList);
+                versionNotifier.sendHealthCheck(true, list.size(), null);
+            } else {
+                log.info("No new data found!");
+                versionNotifier.sendHealthCheck(true, 0, null);
             }
-            log.info("New data found! Saving to database...");
-            characterInfoService.saveAll(list);
-            raiderIOService.saveAll(raiderIODataList);
-            warcraftLogsService.saveAll(warcraftLogsDataList);
-        } else {
-            log.info("No new data found!");
+        } catch (Exception e) {
+            log.error("Crawl task failed", e);
+            versionNotifier.sendHealthCheck(false, 0, e.getMessage());
         }
     }
 
     public List<CharacterInfo> crawlWowProgress(String url) {
         try {
-            Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
+            // Her istekten önce yeni bir Tor kimliği al
+            torManager.newIdentity();
+
+            // Tor proxy'si üzerinden bağlan
+            Document doc = Jsoup.connect(url)
+                    .proxy(torManager.getProxy())
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                    .header("Accept-Language", "en-US,en;q=0.5")
+                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9")
+                    .timeout(30000)
+                    .get();
+
             Elements rows = doc.select("table.rating > tbody > tr");
 
             return rows.stream()
@@ -101,7 +123,8 @@ public class WowDataCrawlerService {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            log.error("Failed to crawl character info from web", e);
+            log.error("Failed to crawl through Tor proxy", e);
+            versionNotifier.sendHealthCheck(false, 0, "Tor proxy üzerinden crawl başarısız: " + e.getMessage());
             return Collections.emptyList();
         }
     }

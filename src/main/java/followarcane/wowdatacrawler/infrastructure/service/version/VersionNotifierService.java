@@ -1,9 +1,9 @@
 package followarcane.wowdatacrawler.infrastructure.service.version;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
@@ -26,6 +26,9 @@ public class VersionNotifierService {
 
     @Value("${properties.app.discord.webhook-url}")
     private String discordWebhookUrl;
+
+    @Value("${properties.app.discord.health-check-url}")
+    private String healthCheckUrl;
 
     private final VersionStorageService versionStorage;
 
@@ -75,5 +78,44 @@ public class VersionNotifierService {
         payload.put("embeds", embeds);
 
         return payload.toString();
+    }
+
+    public void sendHealthCheck(boolean isSuccess, int playerCount, String errorMessage) {
+        JSONObject embed = new JSONObject();
+        if (isSuccess) {
+            embed.put("title", "🟢 Crawl Başarılı");
+            embed.put("description", String.format("Toplam %d oyuncu verisi çekildi.", playerCount));
+            embed.put("color", 65280); // Yeşil
+        } else {
+            embed.put("title", "🔴 Crawl Başarısız");
+            embed.put("description", "Hata: " + errorMessage);
+            embed.put("color", 16711680); // Kırmızı
+        }
+
+        JSONObject footer = new JSONObject();
+        footer.put("text", "Powered by Azerite!");
+        footer.put("icon_url", "https://imgur.com/kk6VClj.png");
+        embed.put("footer", footer);
+
+        JSONArray embeds = new JSONArray();
+        embeds.put(embed);
+
+        JSONObject payload = new JSONObject();
+        payload.put("embeds", embeds);
+
+        sendToDiscord(healthCheckUrl, payload.toString());
+    }
+
+    private void sendToDiscord(String webhookUrl, String message) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        HttpEntity<String> entity = new HttpEntity<>(message, headers);
+        ResponseEntity<String> response = restTemplate.exchange(webhookUrl, HttpMethod.POST, entity, String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            log.error("Failed to send Discord notification. Response: {}", response.getBody());
+        }
     }
 }

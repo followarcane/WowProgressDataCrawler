@@ -4,7 +4,6 @@ import followarcane.wowdatacrawler.domain.model.CharacterInfo;
 import followarcane.wowdatacrawler.domain.model.RaiderIOData;
 import followarcane.wowdatacrawler.domain.model.WarcraftLogsData;
 import followarcane.wowdatacrawler.infrastructure.service.cloudflare.FlareSolverrService;
-import followarcane.wowdatacrawler.infrastructure.service.proxy.ProxyRotator;
 import followarcane.wowdatacrawler.infrastructure.service.repoService.CharacterInfoService;
 import followarcane.wowdatacrawler.infrastructure.service.repoService.WarcraftLogsDataService;
 import followarcane.wowdatacrawler.infrastructure.service.version.VersionNotifierService;
@@ -23,7 +22,10 @@ import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,8 +38,6 @@ public class WowDataCrawlerService {
     private final WarcraftLogsService warcraftLogsService;
     private final WarcraftLogsDataService warcraftLogsDataService;
     private final VersionNotifierService versionNotifier;
-    private final ProxyRotator proxyRotator;
-    private final CookieService cookieService;
     private final FlareSolverrService flareSolverr;
 
     private List<CharacterInfo> lastFetchedData = new ArrayList<>();
@@ -238,29 +238,6 @@ public class WowDataCrawlerService {
                 .map(this::createCharacterInfoFromRow)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-    }
-
-    private Map<String, String> getHeaders(String url) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-        headers.put("Accept-Language", "en-GB,en-US;q=0.9,en;q=0.8");
-        headers.put("Accept-Encoding", "gzip, deflate, br, zstd");
-        headers.put("sec-ch-ua", "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"");
-        headers.put("sec-ch-ua-mobile", "?0");
-        headers.put("sec-ch-ua-platform", "\"macOS\"");
-        headers.put("Upgrade-Insecure-Requests", "1");
-        headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36");
-        headers.put("Connection", "keep-alive");
-        headers.put("Host", "www.wowprogress.com");
-
-        if (url.contains("wowprogress.com")) {
-            String cookie = cookieService.getCookie();
-            if (cookie != null) {
-                headers.put("Cookie", cookie);
-            }
-        }
-
-        return headers;
     }
 }
 

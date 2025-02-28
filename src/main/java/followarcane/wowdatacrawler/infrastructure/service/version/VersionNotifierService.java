@@ -83,13 +83,13 @@ public class VersionNotifierService {
     public void sendHealthCheck(boolean isSuccess, int playerCount, String errorMessage) {
         JSONObject embed = new JSONObject();
         if (isSuccess) {
-            embed.put("title", "🟢 Crawl Başarılı");
-            embed.put("description", String.format("Toplam %d oyuncu verisi çekildi.", playerCount));
-            embed.put("color", 65280); // Yeşil
+            embed.put("title", "🟢 Crawl Successful");
+            embed.put("description", String.format("Total %d player(s) processed.", playerCount));
+            embed.put("color", 65280); // Green
         } else {
-            embed.put("title", "🔴 Crawl Başarısız");
-            embed.put("description", "Hata: " + errorMessage);
-            embed.put("color", 16711680); // Kırmızı
+            embed.put("title", "🔴 Crawl Failed");
+            embed.put("description", "Error: " + errorMessage);
+            embed.put("color", 16711680); // Red
         }
 
         JSONObject footer = new JSONObject();

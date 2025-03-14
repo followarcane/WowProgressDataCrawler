@@ -42,7 +42,7 @@ public class WarcraftLogsService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final int[] ZONE_IDS = {38}; //26, 31, 33, 35
+    private static final int[] ZONE_IDS = {42}; //26, 31, 33, 35
 
     public Optional<String> authenticate() {
         String credentials = clientId + ":" + clientSecret;

@@ -21,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,12 @@ public class RaiderIOService {
 
     @Value("${properties.raiderio.url}")
     private String raiderIOUrl;
+
+    // Sadece istediğimiz raid'lerin listesi
+    private static final List<String> CURRENT_RAIDS = Arrays.asList(
+            "liberation-of-undermine",
+            "nerubar-palace"
+    );
 
     public void saveAll(List<RaiderIOData> raiderIODataList) {
         raiderIODataRepository.saveAll(raiderIODataList);
@@ -80,11 +87,14 @@ public class RaiderIOService {
 
                 List<RaidProgression> raidProgressions = new ArrayList<>();
                 for (Map.Entry<String, Map<String, Object>> entry : raidProgressionMap.entrySet()) {
-                    RaidProgression raidProgression = new RaidProgression();
-                    raidProgression.setRaidName(formatRaidName(entry.getKey()));
-                    raidProgression.setSummary((String) entry.getValue().get("summary"));
-                    raidProgression.setCharacterInfo(info);
-                    raidProgressions.add(raidProgression);
+                    // Sadece istediğimiz raid'leri ekle
+                    if (CURRENT_RAIDS.contains(entry.getKey())) {
+                        RaidProgression raidProgression = new RaidProgression();
+                        raidProgression.setRaidName(formatRaidName(entry.getKey()));
+                        raidProgression.setSummary((String) entry.getValue().get("summary"));
+                        raidProgression.setCharacterInfo(info);
+                        raidProgressions.add(raidProgression);
+                    }
                 }
                 info.setRaidProgressions(raidProgressions);
                 Thread.sleep(300);

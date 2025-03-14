@@ -112,7 +112,8 @@ public class WarcraftLogsService {
 
             WarcraftLogsData wclData = new WarcraftLogsData();
 
-            wclData.setZoneName("zone 38");
+            //Undermine
+            wclData.setZoneName("zone 42");
             wclData.setMetric("dps");
             wclData.setDifficulty(characterNode.path("zone" + ZONE_IDS[0]).path("difficulty").asText());
             wclData.setBestPerformanceAverage(characterNode.path("zone" + ZONE_IDS[0]).path("bestPerformanceAverage").asDouble());

@@ -50,6 +50,31 @@ public class RaiderIOService {
         raiderIODataRepository.deleteAll();
     }
 
+    private String calculateBestProgression(Map<String, Object> raidData) {
+        int totalBosses = (int) raidData.get("total_bosses");
+        int mythicKills = (int) raidData.get("mythic_bosses_killed");
+        int heroicKills = (int) raidData.get("heroic_bosses_killed");
+        int normalKills = (int) raidData.get("normal_bosses_killed");
+
+        // Önce Mythic kontrol
+        if (mythicKills > 0) {
+            return String.format("%d/%dM", mythicKills, totalBosses);
+        }
+
+        // Sonra Heroic kontrol
+        if (heroicKills > 0) {
+            return String.format("%d/%dH", heroicKills, totalBosses);
+        }
+
+        // En son Normal kontrol
+        if (normalKills > 0) {
+            return String.format("%d/%dN", normalKills, totalBosses);
+        }
+
+        // Hiç kill yoksa 0/totalBossesN formatında döndür
+        return String.format("0/%dN", totalBosses);
+    }
+
     @SneakyThrows
     public RaiderIOData fetchRaiderIOData(CharacterInfo info) {
         String realm = info.getRealm();
@@ -87,11 +112,10 @@ public class RaiderIOService {
 
                 List<RaidProgression> raidProgressions = new ArrayList<>();
                 for (Map.Entry<String, Map<String, Object>> entry : raidProgressionMap.entrySet()) {
-                    // Sadece istediğimiz raid'leri ekle
                     if (CURRENT_RAIDS.contains(entry.getKey())) {
                         RaidProgression raidProgression = new RaidProgression();
                         raidProgression.setRaidName(formatRaidName(entry.getKey()));
-                        raidProgression.setSummary((String) entry.getValue().get("summary"));
+                        raidProgression.setSummary(calculateBestProgression(entry.getValue()));
                         raidProgression.setCharacterInfo(info);
                         raidProgressions.add(raidProgression);
                     }
@@ -104,7 +128,6 @@ public class RaiderIOService {
         }
         return partialData;
     }
-
 
     private String formatRaidName(String raidName) {
         String[] words = raidName.split("-");
